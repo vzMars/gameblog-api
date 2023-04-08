@@ -1,19 +1,21 @@
 import { NextFunction, Request, Response } from 'express';
+import { isHttpError } from 'http-errors';
 
 const errorHandler = (
-  err: unknown,
+  error: unknown,
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
-  const status = res.statusCode ? res.statusCode : 500;
-  let errorMessage = 'An unknown error as occurred.';
+  let errorMessage = 'An unknown error has occurred.';
+  let statusCode = 500;
 
-  if (err instanceof Error) {
-    errorMessage = err.message;
+  if (isHttpError(error)) {
+    statusCode = error.status;
+    errorMessage = error.message;
   }
 
-  res.status(status).json({ message: errorMessage });
+  res.status(statusCode).json({ error: errorMessage });
 };
 
 export default errorHandler;
