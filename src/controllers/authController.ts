@@ -4,7 +4,13 @@ import passport from 'passport';
 import User from '../models/User';
 
 export const authStatus = (req: Request, res: Response) => {
-  res.status(200).json('auth status');
+  // ensureAuth middleware is run before this route is even reached
+  // req.user will not be undefined
+  const { id, email, username } = req.user!;
+
+  res.status(200).json({
+    user: { id, email, username },
+  });
 };
 
 export const login = (req: Request, res: Response, next: NextFunction) => {
