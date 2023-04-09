@@ -54,7 +54,12 @@ export const login = (
 };
 
 export const logout = (req: Request, res: Response, next: NextFunction) => {
-  res.status(200).json('logout');
+  req.logout((err) => {
+    if (err) return next(err);
+    req.session.destroy((err) => {
+      res.status(200).json({ message: 'Successfully logged out.' });
+    });
+  });
 };
 
 interface ISignUpBody {
