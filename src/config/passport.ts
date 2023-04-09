@@ -2,14 +2,6 @@ import { PassportStatic } from 'passport';
 import { Strategy as LocalStrategy } from 'passport-local';
 import User from '../models/User';
 
-declare global {
-  namespace Express {
-    interface User {
-      id: string;
-    }
-  }
-}
-
 const options = {
   usernameField: 'email',
   passwordField: 'password',
