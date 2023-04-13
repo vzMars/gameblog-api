@@ -2,7 +2,7 @@ import multer from 'multer';
 import path from 'path';
 import createHttpError from 'http-errors';
 
-multer({
+const upload = multer({
   storage: multer.diskStorage({}),
   fileFilter: (req, file, cb) => {
     let ext = path.extname(file.originalname);
@@ -12,3 +12,5 @@ multer({
     cb(null, true);
   },
 });
+
+export default upload;
