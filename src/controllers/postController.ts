@@ -1,4 +1,8 @@
 import { NextFunction, Request, Response } from 'express';
+import { ParamsDictionary } from 'express-serve-static-core';
+import createHttpError = require('http-errors');
+import Post from '../models/Post';
+import cloudinary from '../middleware/cloudinary';
 
 export const getPosts = (req: Request, res: Response, next: NextFunction) => {
   res.status(200).send('get posts');
@@ -8,8 +12,45 @@ export const getPost = (req: Request, res: Response, next: NextFunction) => {
   res.status(200).send('get post');
 };
 
-export const createPost = (req: Request, res: Response, next: NextFunction) => {
-  res.status(200).send('create post');
+interface ICreateBody {
+  title: string;
+  content: string;
+  tag: string;
+}
+
+export const createPost = async (
+  req: Request<ParamsDictionary, any, ICreateBody>,
+  res: Response,
+  next: NextFunction
+) => {
+  const { title, content, tag } = req.body;
+  const file = req.file;
+  const user = req.user;
+
+  try {
+    if (!user) {
+      throw createHttpError(401, 'You must be logged in to create a post.');
+    }
+
+    if (!title || !content || !tag || !file) {
+      throw createHttpError(400, 'Please complete all required fields.');
+    }
+
+    const result = await cloudinary.uploader.upload(file.path);
+
+    const post = await Post.create({
+      title,
+      content,
+      image: result.secure_url,
+      cloudinaryId: result.public_id,
+      tag,
+      user: user.id,
+    });
+
+    res.status(200).json(post);
+  } catch (err) {
+    next(err);
+  }
 };
 
 export const updatePost = (req: Request, res: Response, next: NextFunction) => {
