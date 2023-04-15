@@ -4,8 +4,20 @@ import createHttpError = require('http-errors');
 import Post from '../models/Post';
 import cloudinary from '../middleware/cloudinary';
 
-export const getPosts = (req: Request, res: Response, next: NextFunction) => {
-  res.status(200).send('get posts');
+export const getPosts = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const posts = await Post.find().populate('user', 'username').sort({
+      createdAt: -1,
+    });
+
+    res.status(200).json(posts);
+  } catch (err) {
+    next(err);
+  }
 };
 
 export const getPost = (req: Request, res: Response, next: NextFunction) => {
