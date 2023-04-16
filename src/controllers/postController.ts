@@ -20,6 +20,22 @@ export const getPosts = async (
   }
 };
 
+export const getTag = (req: Request, res: Response, next: NextFunction) => {
+  const { tag } = req.params;
+
+  try {
+    const validTags: string[] = Post.schema.path('tag').options.enum;
+
+    if (!validTags.includes(tag.toLowerCase())) {
+      throw createHttpError(400, 'Tag not found.');
+    }
+
+    res.status(200).json(tag.toLowerCase());
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const getPost = (req: Request, res: Response, next: NextFunction) => {
   res.status(200).send('get post');
 };
