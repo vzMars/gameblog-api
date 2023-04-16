@@ -59,6 +59,8 @@ export const createPost = async (
       user: user.id,
     });
 
+    await post.populate('user', 'username');
+
     res.status(200).json(post);
   } catch (err) {
     next(err);
