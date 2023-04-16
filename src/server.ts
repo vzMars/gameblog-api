@@ -16,6 +16,7 @@ import connectDB from './config/database';
 import errorHandler from './middleware/errorHandler';
 import authRoutes from './routes/auth';
 import postRoutes from './routes/post';
+import userRoutes from './routes/user';
 
 const app = express();
 
@@ -55,6 +56,7 @@ app.use(passport.session());
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/posts', postRoutes);
+app.use('/api/user', userRoutes);
 app.use('*', (req: Request, res: Response, next: NextFunction) => {
   next(createHttpError(404, '404 Not Found'));
 });
