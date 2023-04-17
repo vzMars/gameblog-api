@@ -108,6 +108,36 @@ export const updatePost = (req: Request, res: Response, next: NextFunction) => {
   res.status(200).send('update post');
 };
 
-export const deletePost = (req: Request, res: Response, next: NextFunction) => {
-  res.status(200).send('delete post');
+export const deletePost = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { id } = req.params;
+  const user = req.user;
+  try {
+    if (!user) {
+      throw createHttpError(401, 'You must be logged in to delete a post.');
+    }
+
+    if (!isValidObjectId(id)) {
+      throw createHttpError(400, 'Invalid ID.');
+    }
+
+    const post = await Post.findById(id).populate('user', 'username');
+
+    if (!post) {
+      throw createHttpError(400, 'Post not found.');
+    }
+
+    if (post.user._id.toString() !== user.id) {
+      throw createHttpError(400, "Cannot delete another user's post.");
+    }
+
+    await post.deleteOne();
+
+    res.status(200).json(post);
+  } catch (err) {
+    next(err);
+  }
 };
