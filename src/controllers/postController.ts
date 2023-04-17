@@ -104,8 +104,60 @@ export const createPost = async (
   }
 };
 
-export const updatePost = (req: Request, res: Response, next: NextFunction) => {
-  res.status(200).send('update post');
+interface IEditBody {
+  title: string;
+  content: string;
+  tag: string;
+}
+
+export const editPost = async (
+  req: Request<ParamsDictionary, any, IEditBody>,
+  res: Response,
+  next: NextFunction
+) => {
+  const { id } = req.params;
+  const { title, content, tag } = req.body;
+  const file = req.file;
+  const user = req.user;
+
+  try {
+    if (!user) {
+      throw createHttpError(401, 'You must be logged in to edit a post.');
+    }
+
+    if (!isValidObjectId(id)) {
+      throw createHttpError(400, 'Invalid ID.');
+    }
+
+    const post = await Post.findById(id).populate('user', 'username');
+
+    if (!post) {
+      throw createHttpError(400, 'Post not found.');
+    }
+
+    if (post.user._id.toString() !== user.id) {
+      throw createHttpError(400, "Cannot edit another user's post.");
+    }
+
+    if (!title || !content || !tag || !file) {
+      throw createHttpError(400, 'Please complete all required fields.');
+    }
+
+    await cloudinary.uploader.destroy(post.cloudinaryId);
+    const result = await cloudinary.uploader.upload(file.path);
+
+    post.title = title;
+    post.content = content;
+    post.tag = tag;
+    post.image = result.secure_url;
+    post.cloudinaryId = result.public_id;
+
+    await post.save();
+
+    res.status(200).send(post);
+  } catch (err) {
+    next(err);
+  }
 };
 
 export const deletePost = async (
