@@ -134,6 +134,7 @@ export const deletePost = async (
       throw createHttpError(400, "Cannot delete another user's post.");
     }
 
+    await cloudinary.uploader.destroy(post.cloudinaryId);
     await post.deleteOne();
 
     res.status(200).json(post);
