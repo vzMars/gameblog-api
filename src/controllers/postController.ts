@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { ParamsDictionary } from 'express-serve-static-core';
+import { isValidObjectId } from 'mongoose';
 import createHttpError = require('http-errors');
 import Post from '../models/Post';
 import cloudinary from '../middleware/cloudinary';
@@ -36,8 +37,28 @@ export const getTag = (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-export const getPost = (req: Request, res: Response, next: NextFunction) => {
-  res.status(200).send('get post');
+export const getPost = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { id } = req.params;
+
+  try {
+    if (!isValidObjectId(id)) {
+      throw createHttpError(400, 'Invalid ID.');
+    }
+
+    const post = await Post.findById(id).populate('user', 'username');
+
+    if (!post) {
+      throw createHttpError(400, 'Post not found.');
+    }
+
+    res.status(200).json(post);
+  } catch (err) {
+    next(err);
+  }
 };
 
 interface ICreateBody {
