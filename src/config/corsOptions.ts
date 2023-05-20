@@ -12,7 +12,4 @@ const corsOptions: CorsOptions = {
   credentials: true,
 };
 
-// line below allows postman to access api
-// (origin && allowedOrigins.indexOf(origin) !== -1) || !origin
-
 export default corsOptions;
