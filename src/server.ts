@@ -64,7 +64,7 @@ app.use('*', (req: Request, res: Response, next: NextFunction) => {
 // Error Handler
 app.use(errorHandler);
 
-const PORT = env.PORT;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+const port = env.PORT || 8080;
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
 });
